@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sổ việc cưới</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Sổ việc cưới">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#eef2f1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f181b" media="(prefers-color-scheme: dark)">
+<meta name="format-detection" content="telephone=no">
+<style>
+:root {
+  --bg: #eef2f1; --surface: #ffffff; --surface-2: #f4f7f6; --fg: #172226; --muted: #5b6b70;
+  --line: #d5dedc; --accent: #1c5b63; --accent-fg: #ffffff; --owed: #9a4f00; --owed-bg: #fbeedb;
+  --paid: #25704a; --paid-bg: #def1e6; --danger: #b3261e; --scrim: rgba(12, 22, 26, 0.5);
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f181b; --surface: #172327; --surface-2: #1d2c31; --fg: #e8f0ee; --muted: #93a6aa;
+    --line: #2a3b40; --accent: #6fc0c8; --accent-fg: #0b1a1d; --owed: #f0b25c; --owed-bg: #3a2a12;
+    --paid: #84cfa4; --paid-bg: #17342a; --danger: #ff8f86; --scrim: rgba(0, 0, 0, 0.62);
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 16px; line-height: 1.5;
+  padding-top: calc(16px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+.top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+h1 { font-size: 1.5rem; line-height: 1.2; margin: 0; font-weight: 700; letter-spacing: -0.01em; }
+.sub { margin: 4px 0 0; color: var(--muted); font-size: 0.9rem; }
+.totals { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.total { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; min-width: 0; }
+.total .k { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.total .v { font-size: 1.1rem; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 2px; overflow-wrap: anywhere; }
+.total.owed .v { color: var(--owed); }
+.tabs { display: flex; gap: 6px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; padding: 4px; }
+.tab { flex: 1; border: 0; background: transparent; color: var(--muted); font: inherit; font-weight: 600; font-size: 0.95rem; padding: 10px 6px; border-radius: 7px; cursor: pointer; }
+.tab[aria-selected="true"] { background: var(--surface); color: var(--fg); box-shadow: 0 1px 2px rgba(0,0,0,.14); }
+.search { width: 100%; font: inherit; color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px; min-height: 44px; }
+.note { background: var(--owed-bg); color: var(--owed); border-radius: 8px; padding: 10px 12px; font-size: 0.9rem; }
+.list { display: flex; flex-direction: column; gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.card-head { padding: 14px 16px 12px; display: flex; flex-direction: column; gap: 4px; border-bottom: 1px solid var(--line); }
+.card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.name { font-size: 1.15rem; font-weight: 700; line-height: 1.3; margin: 0; overflow-wrap: anywhere; min-width: 0; }
+.when { color: var(--muted); font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+.pill { flex: none; font-size: 0.75rem; font-weight: 700; padding: 3px 9px; border-radius: 99px; white-space: nowrap; }
+.pill.owed { background: var(--owed-bg); color: var(--owed); }
+.pill.paid { background: var(--paid-bg); color: var(--paid); }
+dl.rows { margin: 0; display: flex; flex-direction: column; }
+.row { display: grid; grid-template-columns: 6.6rem minmax(0, 1fr); gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--line); align-items: baseline; }
+.row:last-child { border-bottom: 0; }
+.row dt { color: var(--muted); font-size: 0.82rem; }
+.row dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.num { font-variant-numeric: tabular-nums; font-weight: 600; }
+.row.remain dd { font-size: 1.05rem; font-weight: 700; }
+.row.remain.owed dd { color: var(--owed); }
+.row.remain.paid dd { color: var(--paid); }
+.phone-line { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { background: var(--surface-2); border: 1px solid var(--line); border-radius: 99px; padding: 1px 10px; font-size: 0.9rem; }
+.notes { white-space: pre-wrap; }
+.dim { color: var(--muted); }
+.card-foot { padding: 10px 16px 14px; display: flex; justify-content: flex-end; }
+button { font: inherit; }
+.btn { border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 9px; padding: 9px 14px; font-weight: 600; cursor: pointer; min-height: 44px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.btn.small { padding: 4px 12px; min-height: 34px; font-size: 0.85rem; }
+.btn.danger { color: var(--danger); border-color: var(--danger); background: transparent; }
+.btn.ghost { min-height: 38px; padding: 6px 12px; font-size: 0.85rem; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.empty { text-align: center; padding: 36px 20px; color: var(--muted); background: var(--surface); border: 1px dashed var(--line); border-radius: 12px; }
+.empty strong { display: block; color: var(--fg); font-size: 1.05rem; margin-bottom: 4px; }
+.fab-bar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+  padding-top: 12px; padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  background: linear-gradient(to top, var(--bg) 70%, transparent);
+}
+.fab-bar .btn { display: flex; width: 100%; max-width: 520px; margin: 0 auto; min-height: 50px; font-size: 1.02rem; }
+.scrim { position: fixed; inset: 0; background: var(--scrim); z-index: 20; display: flex; align-items: flex-end; justify-content: center; }
+.scrim[hidden] { display: none; }
+.sheet {
+  background: var(--surface); width: 100%; max-width: 560px; max-height: 94dvh; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  border-radius: 16px 16px 0 0; padding-top: 18px; padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.sheet h2 { margin: 0 0 14px; font-size: 1.2rem; }
+form, .stack { display: flex; flex-direction: column; gap: 14px; }
+.field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.field label { font-size: 0.82rem; font-weight: 600; color: var(--muted); }
+/* 16px trở lên để iPhone không tự phóng to khi bấm vào ô nhập */
+.field input, .field textarea { width: 100%; font: inherit; font-size: 16px; color: var(--fg); background: var(--surface-2); border: 1px solid var(--line); border-radius: 9px; padding: 11px 12px; min-height: 46px; }
+.field textarea { resize: vertical; min-height: 84px; }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.calc { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 9px; padding: 10px 12px; }
+.calc b { font-variant-numeric: tabular-nums; font-size: 1.05rem; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.actions .btn { flex: 1; }
+.err { color: var(--danger); font-size: 0.9rem; min-height: 1.2em; margin: 0; }
+.help { color: var(--muted); font-size: 0.88rem; margin: 0; }
+@media (max-width: 380px) { .pair { grid-template-columns: 1fr; } .row { grid-template-columns: 5.6rem minmax(0, 1fr); } }
+@media (prefers-reduced-motion: no-preference) { .sheet { animation: up .18s ease-out; } @keyframes up { from { transform: translateY(24px); opacity: .6; } } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Sổ việc cưới</h1>
+      <p class="sub">Ghi lịch chụp, tiền cọc và ekip cho từng khách.</p>
+    </div>
+    <button class="btn ghost" id="backupBtn" type="button">Sao lưu</button>
+  </header>
+
+  <div class="totals" aria-live="polite">
+    <div class="total owed"><div class="k">Còn phải thu</div><div class="v" id="tOwed">0 ₫</div></div>
+    <div class="total"><div class="k">Lịch sắp tới</div><div class="v" id="tCount">0</div></div>
+  </div>
+
+  <div class="tabs" role="tablist" aria-label="Lọc lịch chụp">
+    <button class="tab" role="tab" id="tabUp" aria-selected="true" type="button">Sắp tới</button>
+    <button class="tab" role="tab" id="tabPast" aria-selected="false" type="button">Đã qua</button>
+  </div>
+
+  <input class="search" id="q" type="search" placeholder="Tìm theo tên khách hoặc số điện thoại" autocomplete="off" enterkeyhint="search">
+
+  <div id="note" class="note" hidden></div>
+  <div id="list" class="list"></div>
+</div>
+
+<div class="fab-bar"><button class="btn primary" id="addBtn" type="button">+ Thêm lịch chụp</button></div>
+
+<div class="scrim" id="scrim" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <h2 id="sheetTitle">Thêm lịch chụp</h2>
+    <form id="f" novalidate>
+      <div class="field"><label for="fName">Tên khách hàng</label><input id="fName" autocomplete="off" placeholder="Ví dụ: Minh Anh &amp; Quốc Huy"></div>
+      <div class="field"><label for="fPhone">Số điện thoại</label><input id="fPhone" type="tel" inputmode="tel" autocomplete="off" placeholder="09xx xxx xxx"></div>
+      <div class="field"><label for="fWhen">Thời gian làm việc</label><input id="fWhen" type="datetime-local"></div>
+      <div class="field"><label for="fPkg">Gói chụp</label><input id="fPkg" autocomplete="off" placeholder="Ví dụ: Phóng sự cưới 1 ngày"></div>
+      <div class="pair">
+        <div class="field"><label for="fPrice">Giá gói (₫)</label><input id="fPrice" inputmode="numeric" autocomplete="off" placeholder="8.000.000"></div>
+        <div class="field"><label for="fDeposit">Đã cọc (₫)</label><input id="fDeposit" inputmode="numeric" autocomplete="off" placeholder="2.000.000"></div>
+      </div>
+      <div class="calc"><span>Còn lại</span><b id="fRemain">0 ₫</b></div>
+      <div class="field"><label for="fEkip">Ekip (ngăn cách bằng dấu phẩy)</label><textarea id="fEkip" placeholder="Thợ chính, phụ chụp, make-up, quay phim"></textarea></div>
+      <div class="field"><label for="fNotes">Yêu cầu riêng</label><textarea id="fNotes" placeholder="Địa điểm, phong cách, cảnh bắt buộc, lưu ý gia đình..."></textarea></div>
+      <p class="err" id="err" role="alert"></p>
+      <div class="actions">
+        <button class="btn primary" type="submit">Lưu</button>
+        <button class="btn" id="cancelBtn" type="button">Đóng</button>
+      </div>
+      <button class="btn danger" id="delBtn" type="button" hidden>Xóa lịch này</button>
+    </form>
+  </div>
+</div>
+
+<div class="scrim" id="bscrim" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="bTitle">
+    <h2 id="bTitle">Sao lưu và khôi phục</h2>
+    <div class="stack">
+      <p class="help">Dữ liệu nằm trong điện thoại này. Hãy sao lưu thường xuyên: bấm “Chép dữ liệu” rồi dán vào Ghi chú hoặc gửi cho chính mình qua Zalo. Khi đổi máy, dán lại vào ô dưới và bấm “Khôi phục”.</p>
+      <div class="field"><label for="bText">Dữ liệu sao lưu</label><textarea id="bText" rows="6" spellcheck="false"></textarea></div>
+      <p class="err" id="bErr" role="alert"></p>
+      <div class="actions">
+        <button class="btn primary" id="bCopy" type="button">Chép dữ liệu</button>
+        <button class="btn" id="bRestore" type="button">Khôi phục</button>
+      </div>
+      <button class="btn" id="bClose" type="button">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
